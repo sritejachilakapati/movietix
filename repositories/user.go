@@ -1,21 +1,31 @@
 package repositories
 
-import "movietix/models"
+import (
+	"movietix/models"
+
+	"gorm.io/gorm"
+)
 
 type UserRepository interface {
-	GetUserByID(id int) (*models.User, error)
+	GetUserByID(id string) (*models.User, error)
+	CreateUser(user *models.User) error
 }
 
-type pgUserRepository struct{}
-
-func (r *pgUserRepository) GetUserByID(id int) (*models.User, error) {
-	return &models.User{
-		ID:   id,
-		Name: "John Doe",
-		Age:  30,
-	}, nil
+type pgUserRepository struct {
+	db *gorm.DB
 }
 
-func NewUserRepository() UserRepository {
-	return &pgUserRepository{}
+func (r *pgUserRepository) GetUserByID(id string) (*models.User, error) {
+	var user models.User
+	result := r.db.First(&user, "id = ?", id)
+	return &user, result.Error
+}
+
+func (r *pgUserRepository) CreateUser(user *models.User) error {
+	result := r.db.Create(user)
+	return result.Error
+}
+
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &pgUserRepository{db}
 }
