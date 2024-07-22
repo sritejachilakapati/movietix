@@ -85,6 +85,6 @@ The database schema includes the following tables:
 6. **Run the application:**
 
     ```bash
-    go run main.go
+    go run cmd/main.go
     ```
 
