@@ -2,8 +2,9 @@ package services
 
 import (
 	"context"
-	"movietix/models"
-	"movietix/repositories"
+
+	"github.com/sritejachilakapati/movietix/models"
+	"github.com/sritejachilakapati/movietix/repositories"
 )
 
 type UserService interface {

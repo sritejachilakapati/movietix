@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"movietix/internal/config"
-	"movietix/internal/database"
-	"movietix/models"
-	"movietix/repositories"
-	"movietix/services"
+
+	"github.com/sritejachilakapati/movietix/internal/config"
+	"github.com/sritejachilakapati/movietix/internal/database"
+	"github.com/sritejachilakapati/movietix/models"
+	"github.com/sritejachilakapati/movietix/repositories"
+	"github.com/sritejachilakapati/movietix/services"
 
 	"github.com/google/uuid"
 )

@@ -3,8 +3,9 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"movietix/models"
 	"strings"
+
+	"github.com/sritejachilakapati/movietix/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

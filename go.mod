@@ -1,4 +1,4 @@
-module movietix
+module github.com/sritejachilakapati/movietix
 
 go 1.21.0
 
