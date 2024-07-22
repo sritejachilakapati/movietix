@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func InitDB(c context.Context) (*pgxpool.Pool, error) {
+func InitDB(ctx context.Context) (*pgxpool.Pool, error) {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	username := os.Getenv("DB_USERNAME")
@@ -22,5 +22,5 @@ func InitDB(c context.Context) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	return pgxpool.NewWithConfig(c, config)
+	return pgxpool.NewWithConfig(ctx, config)
 }

@@ -19,7 +19,9 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	db, err := database.InitDB(context.Background())
+	ctx := context.Background()
+
+	db, err := database.InitDB(ctx)
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
@@ -37,7 +39,7 @@ func main() {
 		Role:     "admin",
 	}
 
-	err = userService.CreateUser(user)
+	err = userService.CreateUser(ctx, user)
 
 	if err != nil {
 		log.Fatalf("Error creating user: %v", err)
@@ -45,7 +47,7 @@ func main() {
 
 	fmt.Println("User created successfully")
 
-	fetchedUser, err := userService.GetUserByID(user.ID)
+	fetchedUser, err := userService.GetUserByID(ctx, user.ID)
 
 	if err != nil {
 		log.Fatalf("Error fetching user: %v", err)
