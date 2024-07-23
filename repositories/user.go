@@ -14,7 +14,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
 	GetByID(ctx context.Context, id string) (*models.User, error)
 	GetAll(ctx context.Context) ([]*models.User, error)
-	Update(ctx context.Context, user *models.User) error
+	Update(ctx context.Context, id string, updatePayload map[string]interface{}) error
 	Delete(ctx context.Context, id string) error
 	GetByQuery(ctx context.Context, queryParams map[string]interface{}) ([]*models.User, error)
 }
@@ -81,9 +81,26 @@ func (r *userRepository) GetAll(ctx context.Context) ([]*models.User, error) {
 	return users, rows.Err()
 }
 
-func (r *userRepository) Update(ctx context.Context, user *models.User) error {
-	query := `UPDATE users SET name = $1, email = $2, is_active = $4, role = $5, updated_at = $6 WHERE id = $7`
-	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.IsActive, user.Role, user.UpdatedAt, user.ID)
+func (r *userRepository) Update(ctx context.Context, id string, updatePayload map[string]interface{}) error {
+	var setQuery []string
+	var args []interface{}
+	var i = 1
+
+	for key, value := range updatePayload {
+		setQuery = append(setQuery, fmt.Sprintf("%s = $%d", key, i))
+		args = append(args, value)
+		i++
+	}
+	args = append(args, id)
+
+	query := `UPDATE users SET`
+	if len(setQuery) > 0 {
+		query += " " + strings.Join(setQuery, ", ")
+	}
+
+	query += fmt.Sprintf(" WHERE id = $%d", i)
+
+	_, err := r.db.Exec(ctx, query, args...)
 	return err
 }
 
