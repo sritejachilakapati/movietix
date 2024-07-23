@@ -34,7 +34,7 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 }
 
 func (r *userRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
-	query := `SELECT id, name, email, password, is_active, role, created_at, updated_at FROM users WHERE id = $1`
+	query := `SELECT id, name, email, is_active, role, created_at, updated_at FROM users WHERE id = $1`
 	row := r.db.QueryRow(ctx, query, id)
 
 	var user models.User
@@ -42,7 +42,6 @@ func (r *userRepository) GetByID(ctx context.Context, id string) (*models.User, 
 		&user.ID,
 		&user.Name,
 		&user.Email,
-		&user.Password,
 		&user.IsActive,
 		&user.Role,
 		&user.CreatedAt,
@@ -55,7 +54,7 @@ func (r *userRepository) GetByID(ctx context.Context, id string) (*models.User, 
 }
 
 func (r *userRepository) GetAll(ctx context.Context) ([]*models.User, error) {
-	query := `SELECT id, name, email, password, is_active, role, created_at, updated_at FROM users`
+	query := `SELECT id, name, email, is_active, role, created_at, updated_at FROM users`
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -69,7 +68,6 @@ func (r *userRepository) GetAll(ctx context.Context) ([]*models.User, error) {
 			&user.ID,
 			&user.Name,
 			&user.Email,
-			&user.Password,
 			&user.IsActive,
 			&user.Role,
 			&user.CreatedAt,
@@ -84,8 +82,8 @@ func (r *userRepository) GetAll(ctx context.Context) ([]*models.User, error) {
 }
 
 func (r *userRepository) Update(ctx context.Context, user *models.User) error {
-	query := `UPDATE users SET name = $1, email = $2, password = $3, is_active = $4, role = $5, updated_at = $6 WHERE id = $7`
-	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.Password, user.IsActive, user.Role, user.UpdatedAt, user.ID)
+	query := `UPDATE users SET name = $1, email = $2, is_active = $4, role = $5, updated_at = $6 WHERE id = $7`
+	_, err := r.db.Exec(ctx, query, user.Name, user.Email, user.IsActive, user.Role, user.UpdatedAt, user.ID)
 	return err
 }
 
@@ -106,7 +104,7 @@ func (r *userRepository) GetByQuery(ctx context.Context, queryParams map[string]
 		i++
 	}
 
-	query := `SELECT id, name, email, password, is_active, role, created_at, updated_at FROM users`
+	query := `SELECT id, name, email, is_active, role, created_at, updated_at FROM users`
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
@@ -124,7 +122,6 @@ func (r *userRepository) GetByQuery(ctx context.Context, queryParams map[string]
 			&user.ID,
 			&user.Name,
 			&user.Email,
-			&user.Password,
 			&user.IsActive,
 			&user.Role,
 			&user.CreatedAt,
