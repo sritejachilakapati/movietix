@@ -7,6 +7,7 @@ import (
 
 	"github.com/sritejachilakapati/movietix/models"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -27,16 +28,7 @@ func NewUserRepository(db *pgxpool.Pool) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) Create(ctx context.Context, user *models.User) error {
-	query := `INSERT INTO users (id, name, email, password, is_active, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-	_, err := r.db.Exec(ctx, query, user.ID, user.Name, user.Email, user.Password, user.IsActive, user.Role, user.CreatedAt, user.UpdatedAt)
-	return err
-}
-
-func (r *userRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
-	query := `SELECT id, name, email, is_active, role, created_at, updated_at FROM users WHERE id = $1`
-	row := r.db.QueryRow(ctx, query, id)
-
+func (r *userRepository) mapRowToUser(row pgx.Row) (*models.User, error) {
 	var user models.User
 	err := row.Scan(
 		&user.ID,
@@ -47,10 +39,32 @@ func (r *userRepository) GetByID(ctx context.Context, id string) (*models.User, 
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
-	if err != nil {
-		return nil, err
+	return &user, err
+}
+
+func (r *userRepository) mapRowsToUsers(rows pgx.Rows) ([]*models.User, error) {
+	var users []*models.User
+	for rows.Next() {
+		user, err := r.mapRowToUser(rows)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
 	}
-	return &user, nil
+	return users, nil
+}
+
+func (r *userRepository) Create(ctx context.Context, user *models.User) error {
+	query := `INSERT INTO users (id, name, email, password, is_active, role, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	_, err := r.db.Exec(ctx, query, user.ID, user.Name, user.Email, user.Password, user.IsActive, user.Role, user.CreatedAt, user.UpdatedAt)
+	return err
+}
+
+func (r *userRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
+	query := `SELECT id, name, email, is_active, role, created_at, updated_at FROM users WHERE id = $1`
+	row := r.db.QueryRow(ctx, query, id)
+
+	return r.mapRowToUser(row)
 }
 
 func (r *userRepository) GetAll(ctx context.Context) ([]*models.User, error) {
@@ -61,24 +75,7 @@ func (r *userRepository) GetAll(ctx context.Context) ([]*models.User, error) {
 	}
 	defer rows.Close()
 
-	var users []*models.User
-	for rows.Next() {
-		var user models.User
-		if err := rows.Scan(
-			&user.ID,
-			&user.Name,
-			&user.Email,
-			&user.IsActive,
-			&user.Role,
-			&user.CreatedAt,
-			&user.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		users = append(users, &user)
-	}
-
-	return users, rows.Err()
+	return r.mapRowsToUsers(rows)
 }
 
 func (r *userRepository) Update(ctx context.Context, id string, updatePayload map[string]interface{}) error {
@@ -132,22 +129,5 @@ func (r *userRepository) GetByQuery(ctx context.Context, queryParams map[string]
 	}
 	defer rows.Close()
 
-	var users []*models.User
-	for rows.Next() {
-		var user models.User
-		if err := rows.Scan(
-			&user.ID,
-			&user.Name,
-			&user.Email,
-			&user.IsActive,
-			&user.Role,
-			&user.CreatedAt,
-			&user.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		users = append(users, &user)
-	}
-
-	return users, rows.Err()
+	return r.mapRowsToUsers(rows)
 }
