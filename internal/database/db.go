@@ -3,12 +3,13 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 )
 
-func InitDB(ctx context.Context) (*pgxpool.Pool, error) {
+func Connect(ctx context.Context) *pgx.Conn {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	username := os.Getenv("DB_USERNAME")
@@ -17,10 +18,10 @@ func InitDB(ctx context.Context) (*pgxpool.Pool, error) {
 
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", username, password, host, port, database)
 
-	config, err := pgxpool.ParseConfig(dsn)
+	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
-		return nil, err
+		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	return pgxpool.NewWithConfig(ctx, config)
+	return conn
 }

@@ -2,16 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/sritejachilakapati/movietix/internal/config"
 	"github.com/sritejachilakapati/movietix/internal/database"
-	"github.com/sritejachilakapati/movietix/models"
-	"github.com/sritejachilakapati/movietix/repositories"
-	"github.com/sritejachilakapati/movietix/services"
-
-	"github.com/google/uuid"
+	"github.com/sritejachilakapati/movietix/internal/repository"
 )
 
 func main() {
@@ -19,40 +14,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
-
 	ctx := context.Background()
+	conn := database.Connect(ctx)
+	defer conn.Close(ctx)
 
-	db, err := database.InitDB(ctx)
+	userRepo := repository.New(conn)
+
+	users, err := userRepo.GetAllUsers(ctx)
 	if err != nil {
-		log.Fatalf("Error initializing database: %v", err)
-	}
-	defer db.Close()
-
-	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
-
-	user := &models.User{
-		ID:       uuid.New().String(),
-		Name:     "John Doe",
-		Email:    "foo@bar.com",
-		Password: "foobar123",
-		IsActive: true,
-		Role:     "admin",
+		log.Fatalf("Error fetching users: %v", err)
 	}
 
-	err = userService.CreateUser(ctx, user)
-
-	if err != nil {
-		log.Fatalf("Error creating user: %v", err)
+	for _, user := range users {
+		log.Println(user)
 	}
 
-	fmt.Println("User created successfully")
-
-	fetchedUser, err := userService.GetUserByID(ctx, user.ID)
-
-	if err != nil {
-		log.Fatalf("Error fetching user: %v", err)
-	}
-
-	fmt.Printf("Fetched user: %+v\n", fetchedUser)
 }
