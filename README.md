@@ -44,7 +44,7 @@ The database schema includes the following tables:
 ### 1. Clone the repository:
 
   ```bash
-  git clone https://github.com/yourusername/movietix.git
+  git clone https://github.com/sritejachilakapati/movietix.git
   cd movietix
   ```
 
