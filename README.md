@@ -23,6 +23,7 @@ MovieTix is a movie ticket booking system built in Go. It allows users to book t
 - **PostgreSQL**: The database used for storing all the data.
 - **pgx**: A PostgreSQL driver and toolkit for Go.
 - **Gorilla Mux**: A powerful URL router and dispatcher for Golang.
+- **sqlc**: A tool for generating type-safe Go code from SQL queries.
 
 ## Database Schema
 
@@ -40,51 +41,83 @@ The database schema includes the following tables:
 
 ## Installation
 
-1. **Clone the repository:**
+### 1. Clone the repository:
+
+  ```bash
+  git clone https://github.com/yourusername/movietix.git
+  cd movietix
+  ```
+
+### 2. Set up PostgreSQL:
+
+  Make sure you have PostgreSQL installed and running. Create a database for the project:
+
+  ```sql
+  CREATE DATABASE movietix;
+  ```
+
+### 3. Configure environment variables:
+
+  Create a `.env` file in the project root with the following contents. Modify as per your configuration:
+
+  ```plaintext
+  DB_HOST=hostname
+  DB_PORT=port
+  DB_USERNAME=username
+  DB_PASSWORD=password
+  DB_NAME=database
+  ```
+
+### 4. Run database migrations:
+
+  Install the `golang-migrate` package using one of the following methods:
+
+  #### Homebrew (macOS):
+
+  ```bash
+  brew install golang-migrate
+  ```
+
+  #### Linux (apt/yum):
+
+  - **For apt (Debian/Ubuntu):**
 
     ```bash
-    git clone https://github.com/yourusername/movietix.git
-    cd movietix
+    sudo apt-get update
+    sudo apt-get install -y golang-migrate
     ```
 
-2. **Set up PostgreSQL:**
-
-    Make sure you have PostgreSQL installed and running. Create a database for the project:
-
-    ```sql
-    CREATE DATABASE movietix;
-    ```
-
-3. **Configure environment variables:**
-
-    Create a `.env` file in the project root with the following contents. Modify as per your configuration:
-
-    ```plaintext
-    DB_HOST=hostname
-    DB_PORT=port
-    DB_USERNAME=username
-    DB_PASSWORD=password
-    DB_NAME=database
-    ```
-
-4. **Run database migrations:**
-
-    Use the following commands to setup your database schema and triggers:
+  - **For yum (CentOS/Fedora):**
 
     ```bash
-    psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d $DB_NAME -f schema/ddl.sql
-    psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d $DB_NAME -f schema/updated_at_trigger.sql
+    sudo yum install golang-migrate
     ```
 
-5. **Install dependencies:**
+  #### Go install (Go toolchain):
 
-    ```bash
-    go mod tidy
-    ```
+  ```bash
+  go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+  ```
 
-6. **Run the application:**
+  #### Download from GitHub:
 
-    ```bash
-    go run cmd/main.go
-    ```
+  1. Download the binary for your OS from the [golang-migrate releases](https://github.com/golang-migrate/migrate/releases).
+  2. Extract the binary and move it to your `PATH` (e.g., `/usr/local/bin`).
 
+  #### Run the migrations:
+
+  ```bash
+  migrate -path ./migrations -database $DB_URL up
+  ```
+
+### 5. Install dependencies:
+
+  ```bash
+  go mod tidy
+  ```
+
+### 6. Run the application:
+
+  ```bash
+  go run cmd/main.go
+  ```
