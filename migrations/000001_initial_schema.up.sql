@@ -1,110 +1,212 @@
-CREATE TYPE user_role AS ENUM ('admin', 'user');
-CREATE TYPE video_format AS ENUM ('2D', '3D', 'IMAX 2D', 'IMAX 3D', '4DX', 'ICE');
-CREATE TYPE audio_format AS ENUM ('5.1', '7.1', 'ATMOS');
-CREATE TYPE show_status AS ENUM ('OPEN', 'CLOSED', 'CANCELLED');
-CREATE TYPE availability_status AS ENUM ('AVAILABLE', 'FAST FILLING', 'SOLD OUT');
-CREATE TYPE booking_status AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'CANCELLED');
-CREATE TYPE payment_status AS ENUM ('created', 'paid', 'failed', 'refunded');
-
-CREATE TABLE IF NOT EXISTS users (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  role user_role NOT NULL DEFAULT 'user',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- USERS
+-- Stores application users (customers, admins, theater managers)
+-- =====================
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    email TEXT UNIQUE, -- Nullable for OAuth-only accounts
+    phone TEXT UNIQUE, -- Optional contact number
+    password_hash TEXT, -- Nullable for OAuth-only
+    oauth_provider TEXT, -- e.g. 'google', 'facebook', 'apple'
+    oauth_provider_id TEXT, -- Provider's unique user ID
+    role TEXT NOT NULL DEFAULT 'customer', -- customer, admin, theater_manager
+    status TEXT NOT NULL DEFAULT 'active', -- active, disabled, banned
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_status ON users(status);
 
-CREATE TABLE IF NOT EXISTS movies (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(255) NOT NULL,
-  audio_language CHAR(2) NOT NULL,
-  subtitle_language CHAR(2) NOT NULL,
-  formats VARCHAR(10)[] NOT NULL, -- array of `video_format` enum
-  poster VARCHAR(255) NOT NULL,
-  release_date DATE NOT NULL,
-  synopsis TEXT NOT NULL,
-  trailer VARCHAR(255) NOT NULL,
-  movie_cast VARCHAR(255)[] NOT NULL,
-  runtime_minutes INT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- THEATERS
+-- Stores information about theater locations
+-- =====================
+CREATE TABLE theaters (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    address TEXT NOT NULL, -- Human-readable address
+    location GEOGRAPHY(Point, 4326) NOT NULL, -- For distance-based queries
+    contact_phone TEXT,
+    contact_email TEXT,
+    status TEXT NOT NULL DEFAULT 'active', -- active, closed, under_renovation
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_theaters_status ON theaters(status);
+CREATE INDEX idx_theaters_location ON theaters USING GIST(location);
 
-CREATE TABLE IF NOT EXISTS cinemas (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(255) NOT NULL,
-  owner_id uuid REFERENCES users(id),
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  location GEOMETRY(Point, 4326) NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- THEATER_MANAGERS
+-- Maps managers to theaters they control
+-- =====================
+CREATE TABLE theater_managers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    theater_id UUID NOT NULL REFERENCES theaters(id) ON DELETE CASCADE,
+    UNIQUE (user_id, theater_id)
 );
+CREATE INDEX idx_theater_managers_user_id ON theater_managers(user_id);
+CREATE INDEX idx_theater_managers_theater_id ON theater_managers(theater_id);
 
-CREATE TABLE IF NOT EXISTS auditoriums (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  cinema_id uuid REFERENCES cinemas(id),
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  subtitles BOOLEAN NOT NULL DEFAULT FALSE,
-  video_format video_format NOT NULL,
-  audio_format audio_format NOT NULL,
-  total_rows INT NOT NULL,
-  total_seats_per_row INT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- SCREENS
+-- Represents individual screens inside theaters
+-- =====================
+CREATE TABLE screens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    theater_id UUID NOT NULL REFERENCES theaters(id) ON DELETE CASCADE,
+    name TEXT NOT NULL, -- e.g., "Screen 1"
+    total_seats INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_screens_theater_id ON screens(theater_id);
 
-CREATE TABLE IF NOT EXISTS sections (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  auditorium_id uuid REFERENCES auditoriums(id),
-  name VARCHAR(255) NOT NULL, -- 'Prime' | 'Gold' | 'Recliner' etc
-  price INT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- MOVIES
+-- Stores localized movie data (language-specific versions)
+-- =====================
+CREATE TABLE movies (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL, -- e.g., "Oppenheimer"
+    language_code TEXT NOT NULL, -- ISO code, e.g., 'en', 'hi'
+    synopsis TEXT,
+    release_date DATE NOT NULL,
+    runtime_minutes INT,
+    poster_url TEXT,
+    trailer_url TEXT,
+    rating TEXT, -- e.g., PG-13, R, U/A
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_movies_title ON movies(title);
+CREATE INDEX idx_movies_language_code ON movies(language_code);
 
-CREATE TABLE IF NOT EXISTS seats (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  auditorium_id uuid REFERENCES auditoriums(id),
-  section_id uuid REFERENCES sections(id),
-  row_key VARCHAR(2) NOT NULL,  -- 'A' | 'B' | 'C' etc till the total rows
-  seat_number INT NOT NULL,
-  seat_order INT NOT NULL, -- seat order always starts from the left side of the first row when facing the screen. Order will go from `1` till the capacity of the auditorium.
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (auditorium_id, row_key, seat_number)
+-- =====================
+-- FORMATS
+-- Available screening formats (e.g., IMAX, Dolby Atmos)
+-- =====================
+CREATE TABLE formats (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    description TEXT
 );
+CREATE UNIQUE INDEX idx_formats_name ON formats(name);
 
-CREATE TABLE IF NOT EXISTS shows (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  auditorium_id uuid REFERENCES auditoriums(id),
-  movie_id uuid REFERENCES movies(id),
-  show_time TIMESTAMPTZ NOT NULL,
-  status show_status NOT NULL,
-  availability availability_status NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- SCREEN_FORMAT_CAPABILITIES
+-- Which formats a screen supports
+-- =====================
+CREATE TABLE screen_format_capabilities (
+    screen_id UUID NOT NULL REFERENCES screens(id) ON DELETE CASCADE,
+    format_id UUID NOT NULL REFERENCES formats(id) ON DELETE CASCADE,
+    PRIMARY KEY (screen_id, format_id)
 );
+CREATE INDEX idx_sfc_format_id ON screen_format_capabilities(format_id);
 
-CREATE TABLE IF NOT EXISTS payments (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  order_id varchar(60) NOT NULL, -- third party payment gateway order id
-  amount INT NOT NULL,
-  status payment_status NOT NULL,
-  payment_time TIMESTAMPTZ NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- SHOWS
+-- Scheduled movie showings
+-- =====================
+CREATE TABLE shows (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    movie_id UUID NOT NULL REFERENCES movies(id),
+    screen_id UUID NOT NULL REFERENCES screens(id),
+    start_time TIMESTAMPTZ NOT NULL,
+    status TEXT NOT NULL DEFAULT 'scheduled', -- scheduled, running, finished, cancelled
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_shows_movie_id ON shows(movie_id);
+CREATE INDEX idx_shows_screen_id ON shows(screen_id);
+CREATE INDEX idx_shows_start_time ON shows(start_time);
+CREATE INDEX idx_shows_status ON shows(status);
 
-CREATE TABLE IF NOT EXISTS bookings (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id uuid REFERENCES users(id),
-  show_id uuid REFERENCES shows(id),
-  seat_id uuid REFERENCES seats(id),
-  status booking_status NOT NULL,
-  payment_id uuid REFERENCES payments(id),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- =====================
+-- SEAT_TYPES
+-- Defines categories of seats
+-- =====================
+CREATE TABLE seat_types (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL, -- Regular, Premium, Recliner
+    description TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE UNIQUE INDEX idx_seat_types_name ON seat_types(name);
+
+-- =====================
+-- SEATS
+-- Stores physical seats for a screen
+-- =====================
+CREATE TABLE seats (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    screen_id UUID NOT NULL REFERENCES screens(id) ON DELETE CASCADE,
+    seat_row TEXT NOT NULL, -- e.g., 'A'
+    seat_number INT NOT NULL, -- e.g., 1, 2, 3
+    seat_type_id UUID NOT NULL REFERENCES seat_types(id),
+    status TEXT NOT NULL DEFAULT 'active', -- active, inactive
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (screen_id, seat_row, seat_number)
+);
+CREATE INDEX idx_seats_screen_id ON seats(screen_id);
+CREATE INDEX idx_seats_seat_type_id ON seats(seat_type_id);
+CREATE INDEX idx_seats_status ON seats(status);
+
+-- =====================
+-- SHOW_SEAT_PRICING
+-- Price per seat type for a specific show
+-- =====================
+CREATE TABLE show_seat_pricing (
+    show_id UUID NOT NULL REFERENCES shows(id) ON DELETE CASCADE,
+    seat_type_id UUID NOT NULL REFERENCES seat_types(id),
+    price NUMERIC(10,2) NOT NULL,
+    PRIMARY KEY (show_id, seat_type_id)
+);
+CREATE INDEX idx_ssp_seat_type_id ON show_seat_pricing(seat_type_id);
+
+-- =====================
+-- BOOKINGS
+-- Represents a user's ticket purchase
+-- =====================
+CREATE TABLE bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    show_id UUID NOT NULL REFERENCES shows(id),
+    total_amount NUMERIC(10,2) NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', -- pending, confirmed, cancelled
+    payment_reference TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX idx_bookings_show_id ON bookings(show_id);
+CREATE INDEX idx_bookings_status ON bookings(status);
+
+-- =====================
+-- BOOKING_ITEMS
+-- Individual seat bookings within a booking
+-- =====================
+CREATE TABLE booking_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+    seat_id UUID NOT NULL REFERENCES seats(id),
+    price NUMERIC(10,2) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (booking_id, seat_id)
+);
+CREATE INDEX idx_booking_items_booking_id ON booking_items(booking_id);
+CREATE INDEX idx_booking_items_seat_id ON booking_items(seat_id);
+
+-- =====================
+-- SEAT_ALLOCATIONS
+-- Permanent record of seat usage per show
+-- =====================
+CREATE TABLE seat_allocations (
+    show_id UUID NOT NULL REFERENCES shows(id),
+    seat_id UUID NOT NULL REFERENCES seats(id),
+    booking_id UUID, -- NULL until confirmed
+    is_booked BOOLEAN DEFAULT false NOT NULL,
+    PRIMARY KEY (show_id, seat_id)
+);
+CREATE INDEX idx_seat_allocations_booking_id ON seat_allocations(booking_id);
+CREATE INDEX idx_seat_allocations_is_booked ON seat_allocations(is_booked);

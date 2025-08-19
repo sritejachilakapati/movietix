@@ -10,7 +10,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sritejachilakapati/movietix/internal/config"
 	"github.com/sritejachilakapati/movietix/internal/database"
-	"github.com/sritejachilakapati/movietix/internal/repository"
 )
 
 func contentTypeApplicationJsonMiddleware(next http.Handler) http.Handler {
@@ -68,13 +67,7 @@ func main() {
 		params := r.Context().Value(paramsKey).(map[string][]string)
 		fmt.Printf("Params: %v\n", params)
 
-		userRepo := repository.New(conn)
-		users, err := userRepo.GetAllUsers(ctx)
-		if err != nil {
-			log.Fatalf("Error getting movies: %v", err)
-		}
-
-		jw.WriteJson(http.StatusOK, users)
+		jw.WriteHeader(http.StatusOK)
 	}).Methods(http.MethodGet)
 
 	log.Println("Server started at :8080")

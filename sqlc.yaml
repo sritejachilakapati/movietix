@@ -19,52 +19,20 @@ sql:
             go_type: "time.Time"
           - db_type: "date"
             go_type: "time.Time"
-          - db_type: "geometry"
+          - db_type: "text"
+            go_type: "string"
+          - db_type: "int4"
+            go_type: "int32"
+          - db_type: "pg_catalog.numeric"
+            go_type:
+              import: "github.com/jackc/pgx-shopspring-decimal"
+              type: "Decimal"
+          - db_type: "pg_catalog.numeric"
+            nullable: true
+            go_type:
+              import: "github.com/jackc/pgx-shopspring-decimal"
+              type: "NullDecimal"
+          - column: "theaters.location"
             go_type:
               import: "github.com/twpayne/go-geom"
               type: "Point"
-          # Explicitly override the foreign key columns
-          - column: "cinemas.owner_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "auditoriums.cinema_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "sections.auditorium_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "seats.auditorium_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "seats.section_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "shows.auditorium_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "shows.movie_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "bookings.user_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "bookings.show_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "bookings.seat_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
-          - column: "bookings.payment_id"
-            go_type:
-              import: "github.com/google/uuid"
-              type: "UUID"
