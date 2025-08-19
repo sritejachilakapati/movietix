@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	pgx_shopspring_decimal "github.com/jackc/pgx-shopspring-decimal"
-	"github.com/jackc/pgx/v5/pgtype"
 	go_geom "github.com/twpayne/go-geom"
 )
 
@@ -33,22 +32,22 @@ type BookingItem struct {
 }
 
 type Format struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
 }
 
 type Movie struct {
-	ID             uuid.UUID   `json:"id"`
-	Title          string      `json:"title"`
-	LanguageCode   string      `json:"languageCode"`
-	Synopsis       pgtype.Text `json:"synopsis"`
-	ReleaseDate    time.Time   `json:"releaseDate"`
-	RuntimeMinutes pgtype.Int4 `json:"runtimeMinutes"`
-	PosterUrl      pgtype.Text `json:"posterUrl"`
-	TrailerUrl     pgtype.Text `json:"trailerUrl"`
-	Rating         pgtype.Text `json:"rating"`
-	CreatedAt      time.Time   `json:"createdAt"`
+	ID             uuid.UUID `json:"id"`
+	Title          string    `json:"title"`
+	LanguageCode   string    `json:"languageCode"`
+	Synopsis       *string   `json:"synopsis"`
+	ReleaseDate    time.Time `json:"releaseDate"`
+	RuntimeMinutes *int32    `json:"runtimeMinutes"`
+	PosterUrl      *string   `json:"posterUrl"`
+	TrailerUrl     *string   `json:"trailerUrl"`
+	Rating         *string   `json:"rating"`
+	CreatedAt      time.Time `json:"createdAt"`
 }
 
 type Screen struct {
@@ -76,17 +75,17 @@ type Seat struct {
 }
 
 type SeatAllocation struct {
-	ShowID    uuid.UUID   `json:"showId"`
-	SeatID    uuid.UUID   `json:"seatId"`
-	BookingID pgtype.UUID `json:"bookingId"`
-	IsBooked  bool        `json:"isBooked"`
+	ShowID    uuid.UUID  `json:"showId"`
+	SeatID    uuid.UUID  `json:"seatId"`
+	BookingID *uuid.UUID `json:"bookingId"`
+	IsBooked  bool       `json:"isBooked"`
 }
 
 type SeatType struct {
-	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
-	CreatedAt   time.Time   `json:"createdAt"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type Show struct {
@@ -110,8 +109,8 @@ type Theater struct {
 	Name         string        `json:"name"`
 	Address      string        `json:"address"`
 	Location     go_geom.Point `json:"location"`
-	ContactPhone pgtype.Text   `json:"contactPhone"`
-	ContactEmail pgtype.Text   `json:"contactEmail"`
+	ContactPhone *string       `json:"contactPhone"`
+	ContactEmail *string       `json:"contactEmail"`
 	Status       string        `json:"status"`
 	CreatedAt    time.Time     `json:"createdAt"`
 	UpdatedAt    time.Time     `json:"updatedAt"`
@@ -124,15 +123,15 @@ type TheaterManager struct {
 }
 
 type User struct {
-	ID              uuid.UUID   `json:"id"`
-	Name            string      `json:"name"`
-	Email           pgtype.Text `json:"email"`
-	Phone           pgtype.Text `json:"phone"`
-	PasswordHash    pgtype.Text `json:"passwordHash"`
-	OauthProvider   pgtype.Text `json:"oauthProvider"`
-	OauthProviderID pgtype.Text `json:"oauthProviderId"`
-	Role            string      `json:"role"`
-	Status          string      `json:"status"`
-	CreatedAt       time.Time   `json:"createdAt"`
-	UpdatedAt       time.Time   `json:"updatedAt"`
+	ID              uuid.UUID `json:"id"`
+	Name            string    `json:"name"`
+	Email           *string   `json:"email"`
+	Phone           *string   `json:"phone"`
+	PasswordHash    *string   `json:"passwordHash"`
+	OauthProvider   *string   `json:"oauthProvider"`
+	OauthProviderID *string   `json:"oauthProviderId"`
+	Role            string    `json:"role"`
+	Status          string    `json:"status"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
 }
