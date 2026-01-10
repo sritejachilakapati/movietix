@@ -1,0 +1,1 @@
+ALTER TABLE shows ADD COLUMN format_id UUID NOT NULL REFERENCES formats(id);

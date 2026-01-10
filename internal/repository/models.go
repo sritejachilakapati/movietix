@@ -104,6 +104,7 @@ type Show struct {
 	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+	FormatID  uuid.UUID `json:"formatId"`
 }
 
 type ShowSeatPricing struct {
