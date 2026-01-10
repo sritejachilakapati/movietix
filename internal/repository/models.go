@@ -31,6 +31,11 @@ type BookingItem struct {
 	CreatedAt time.Time                      `json:"createdAt"`
 }
 
+type City struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
 type Format struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
@@ -114,6 +119,7 @@ type Theater struct {
 	Status       string        `json:"status"`
 	CreatedAt    time.Time     `json:"createdAt"`
 	UpdatedAt    time.Time     `json:"updatedAt"`
+	CityCode     string        `json:"cityCode"`
 }
 
 type TheaterManager struct {
