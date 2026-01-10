@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	pgx_shopspring_decimal "github.com/jackc/pgx-shopspring-decimal"
+	"github.com/jackc/pgx/v5/pgtype"
 	go_geom "github.com/twpayne/go-geom"
 )
 
@@ -43,16 +44,18 @@ type Format struct {
 }
 
 type Movie struct {
-	ID             uuid.UUID `json:"id"`
-	Title          string    `json:"title"`
-	LanguageCode   string    `json:"languageCode"`
-	Synopsis       *string   `json:"synopsis"`
-	ReleaseDate    time.Time `json:"releaseDate"`
-	RuntimeMinutes *int32    `json:"runtimeMinutes"`
-	PosterUrl      *string   `json:"posterUrl"`
-	TrailerUrl     *string   `json:"trailerUrl"`
-	Rating         *string   `json:"rating"`
-	CreatedAt      time.Time `json:"createdAt"`
+	ID             uuid.UUID      `json:"id"`
+	Title          string         `json:"title"`
+	LanguageCode   string         `json:"languageCode"`
+	Synopsis       *string        `json:"synopsis"`
+	ReleaseDate    time.Time      `json:"releaseDate"`
+	RuntimeMinutes *int32         `json:"runtimeMinutes"`
+	PosterUrl      *string        `json:"posterUrl"`
+	TrailerUrl     *string        `json:"trailerUrl"`
+	Rating         *string        `json:"rating"`
+	CreatedAt      time.Time      `json:"createdAt"`
+	Certification  *string        `json:"certification"`
+	RatingScore    pgtype.Numeric `json:"ratingScore"`
 }
 
 type Screen struct {
