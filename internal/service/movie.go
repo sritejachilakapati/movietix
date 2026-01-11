@@ -18,7 +18,7 @@ type MovieService interface {
 }
 
 type movieService struct {
-	queries *repository.Queries
+	queries repository.Querier
 }
 
 func (m *movieService) GetMoviesByCity(ctx context.Context, cityCode string, limit int32, offset int32) (dto.PageResult[domain.Movie], error) {
@@ -40,7 +40,7 @@ func (m *movieService) GetMoviesByCity(ctx context.Context, cityCode string, lim
 	}, nil
 }
 
-func NewMovieService(queries *repository.Queries) MovieService {
+func NewMovieService(queries repository.Querier) MovieService {
 	return &movieService{
 		queries: queries,
 	}

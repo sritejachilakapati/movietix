@@ -20,7 +20,7 @@ type ShowService interface {
 }
 
 type showService struct {
-	queries *repository.Queries
+	queries repository.Querier
 }
 
 func (s *showService) GetShowsByMovieAndCity(ctx context.Context, limit int32, offset int32, movieId uuid.UUID, cityCode string) (dto.MovieTheaterShows, error) {
@@ -78,4 +78,10 @@ func (s *showService) GetShowsByMovieAndCity(ctx context.Context, limit int32, o
 		NextOffset: nextOffset,
 	}, nil
 
+}
+
+func NewShowService(queries repository.Querier) ShowService {
+	return &showService{
+		queries: queries,
+	}
 }
