@@ -7,14 +7,15 @@ import (
 )
 
 type Movie struct {
-	ID            uuid.UUID  `json:"id"`
-	Title         string     `json:"title"`
-	Description   string     `json:"description"`
-	Language      string     `json:"language"`
-	DurationMin   int        `json:"duration_min"`
-	Certification *string    `json:"certification,omitempty"`
-	Rating        *float32   `json:"rating,omitempty"`
-	ReleaseDate   *time.Time `json:"release_date,omitempty"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	ID             uuid.UUID  `json:"id"`
+	Title          string     `json:"title"`
+	Synopsis       string     `json:"synopsis"`
+	LanguageCode   string     `json:"languageCode"`
+	RuntimeMinutes int        `json:"runtimeMinutes"`
+	PosterURL      *string    `json:"posterUrl,omitempty"`
+	TrailerURL     *string    `json:"trailerUrl,omitempty"`
+	Rating         *float32   `json:"rating,omitempty"`
+	ReleaseDate    *time.Time `json:"releaseDate,omitempty"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	UpdatedAt      time.Time  `json:"updatedAt"`
 }

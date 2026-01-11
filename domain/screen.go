@@ -7,15 +7,14 @@ import (
 )
 
 type Screen struct {
-	ID        uuid.UUID      `json:"id"`
-	TheaterID uuid.UUID      `json:"theater_id"`
-	Name      string         `json:"name"`
-	Capacity  int            `json:"capacity"`
-	Formats   []ScreenFormat `json:"formats,omitempty"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	ID         uuid.UUID      `json:"id"`
+	TheaterID  uuid.UUID      `json:"theaterId"`
+	Name       string         `json:"name"`
+	TotalSeats int            `json:"totalSeats"`
+	Formats    []ScreenFormat `json:"formats,omitempty"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	UpdatedAt  time.Time      `json:"updatedAt"`
 }
-
 type ScreenFormat string
 
 const (

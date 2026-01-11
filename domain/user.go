@@ -13,8 +13,8 @@ type User struct {
 	Phone     string     `json:"phone"`
 	Role      UserRole   `json:"role"`
 	Status    UserStatus `json:"status"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 }
 
 type UserRole string
