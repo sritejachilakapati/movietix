@@ -7,14 +7,14 @@ import (
 )
 
 type Show struct {
-	ID        uuid.UUID      `json:"id"`
-	MovieID   uuid.UUID      `json:"movieId"`
-	ScreenID  uuid.UUID      `json:"screenId"`
-	StartTime time.Time      `json:"startTime"`
-	Status    ShowStatus     `json:"status"`
-	Formats   []ScreenFormat `json:"formats,omitempty"`
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
+	ID        uuid.UUID  `json:"id"`
+	MovieID   uuid.UUID  `json:"movieId"`
+	ScreenID  uuid.UUID  `json:"screenId"`
+	StartTime time.Time  `json:"startTime"`
+	Status    ShowStatus `json:"status"`
+	Format    Format     `json:"format"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 }
 
 type ShowSeatPricing struct {

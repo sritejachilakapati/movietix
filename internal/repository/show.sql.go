@@ -14,35 +14,40 @@ import (
 )
 
 const getShowsByMovieAndCity = `-- name: GetShowsByMovieAndCity :many
-SELECT t.id AS theater_id,
-       t.name AS theater_name,
+SELECT m.id    AS movie_id,
+       m.title AS movie_title,
+       t.id    AS theater_id,
+       t.name  AS theater_name,
        t.address,
        t.location,
-
-       s.id AS show_id,
+       s.id    AS show_id,
        s.start_time,
-
-       f.id AS format_id,
-       f.name AS format_name
-FROM shows s
-         JOIN screens sc ON sc.id = s.screen_id
-         JOIN theaters t ON t.id = sc.theater_id
+       f.id    AS format_id,
+       f.name  AS format_name
+FROM theaters t
+         JOIN screens sc ON sc.theater_id = t.id
+         JOIN shows s ON s.screen_id = sc.id
+         JOIN movies m on m.id = s.movie_id
          JOIN formats f ON f.id = s.format_id
-WHERE s.movie_id = $1
-  AND t.city_code = $2
+WHERE t.city_code = $1
+  AND s.movie_id = $2
   AND s.start_time > now()
   AND s.status != 'cancelled'
-ORDER BY
-    t.name,
-    s.start_time
+ORDER BY t.id, s.start_time
+    LIMIT $3
+OFFSET $4
 `
 
 type GetShowsByMovieAndCityParams struct {
-	MovieID  uuid.UUID `json:"movieId"`
 	CityCode string    `json:"cityCode"`
+	MovieID  uuid.UUID `json:"movieId"`
+	Limit    int32     `json:"limit"`
+	Offset   int32     `json:"offset"`
 }
 
 type GetShowsByMovieAndCityRow struct {
+	MovieID     uuid.UUID     `json:"movieId"`
+	MovieTitle  string        `json:"movieTitle"`
 	TheaterID   uuid.UUID     `json:"theaterId"`
 	TheaterName string        `json:"theaterName"`
 	Address     string        `json:"address"`
@@ -54,7 +59,12 @@ type GetShowsByMovieAndCityRow struct {
 }
 
 func (q *Queries) GetShowsByMovieAndCity(ctx context.Context, arg GetShowsByMovieAndCityParams) ([]GetShowsByMovieAndCityRow, error) {
-	rows, err := q.db.Query(ctx, getShowsByMovieAndCity, arg.MovieID, arg.CityCode)
+	rows, err := q.db.Query(ctx, getShowsByMovieAndCity,
+		arg.CityCode,
+		arg.MovieID,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +73,8 @@ func (q *Queries) GetShowsByMovieAndCity(ctx context.Context, arg GetShowsByMovi
 	for rows.Next() {
 		var i GetShowsByMovieAndCityRow
 		if err := rows.Scan(
+			&i.MovieID,
+			&i.MovieTitle,
 			&i.TheaterID,
 			&i.TheaterName,
 			&i.Address,

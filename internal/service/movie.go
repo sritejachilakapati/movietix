@@ -10,7 +10,7 @@ import (
 
 type MovieService interface {
 	GetMoviesByCity(
-		context context.Context,
+		ctx context.Context,
 		cityCode string,
 		limit int32,
 		offset int32,
@@ -27,12 +27,12 @@ func (m *movieService) GetMoviesByCity(ctx context.Context, cityCode string, lim
 		Limit:    limit,
 		Offset:   offset,
 	}
-	dbMoviesRow, err := m.queries.GetMoviesByCity(ctx, params)
+	dbMovieRows, err := m.queries.GetMoviesByCity(ctx, params)
 	if err != nil {
 		return dto.PageResult[domain.Movie]{}, err
 	}
-	movies := moviesFromDB(dbMoviesRow)
-	nextOffset := calcNextOffset(limit, offset, len(dbMoviesRow))
+	movies := moviesFromDB(dbMovieRows)
+	nextOffset := calcNextOffset(limit, offset, len(dbMovieRows))
 
 	return dto.PageResult[domain.Movie]{
 		Items:      movies,

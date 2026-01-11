@@ -4,15 +4,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/twpayne/go-geom"
 )
+
+type Location struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
 
 type Theater struct {
 	ID           uuid.UUID     `json:"id"`
 	Name         string        `json:"name"`
 	CityCode     string        `json:"cityCode"`
 	Address      string        `json:"address"`
-	Location     *geom.Point   `json:"location,omitempty"`
+	Location     Location      `json:"location,omitempty"`
 	ContactPhone *string       `json:"contactPhone,omitempty"`
 	ContactEmail *string       `json:"contactEmail,omitempty"`
 	Status       TheaterStatus `json:"status"`
