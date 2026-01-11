@@ -15,13 +15,30 @@ func movieFromDB(dbMovie repository.Movie) domain.Movie {
 		}
 	}
 
+	certification := domain.CertificationUnrated
+	if dbMovie.Certification != nil {
+		switch *dbMovie.Certification {
+		case "U":
+			certification = domain.CertificationU
+			break
+		case "A":
+			certification = domain.CertificationA
+			break
+		case "U/A":
+			certification = domain.CertificationUA
+			break
+		default:
+			certification = domain.CertificationUnknown
+		}
+	}
+
 	return domain.Movie{
 		ID:             dbMovie.ID,
 		Title:          dbMovie.Title,
 		Synopsis:       dbMovie.Synopsis,
 		LanguageCode:   dbMovie.LanguageCode,
 		RuntimeMinutes: dbMovie.RuntimeMinutes,
-		Certification:  dbMovie.Certification,
+		Certification:  certification,
 		PosterURL:      dbMovie.PosterUrl,
 		TrailerURL:     dbMovie.TrailerUrl,
 		Rating:         rating,
