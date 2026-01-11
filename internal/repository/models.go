@@ -8,28 +8,27 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	pgx_shopspring_decimal "github.com/jackc/pgx-shopspring-decimal"
 	"github.com/jackc/pgx/v5/pgtype"
 	go_geom "github.com/twpayne/go-geom"
 )
 
 type Booking struct {
-	ID               uuid.UUID                      `json:"id"`
-	UserID           uuid.UUID                      `json:"userId"`
-	ShowID           uuid.UUID                      `json:"showId"`
-	TotalAmount      pgx_shopspring_decimal.Decimal `json:"totalAmount"`
-	Status           string                         `json:"status"`
-	PaymentReference string                         `json:"paymentReference"`
-	CreatedAt        time.Time                      `json:"createdAt"`
-	UpdatedAt        time.Time                      `json:"updatedAt"`
+	ID               uuid.UUID `json:"id"`
+	UserID           uuid.UUID `json:"userId"`
+	ShowID           uuid.UUID `json:"showId"`
+	TotalAmount      int64     `json:"totalAmount"`
+	Status           string    `json:"status"`
+	PaymentReference string    `json:"paymentReference"`
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
 }
 
 type BookingItem struct {
-	ID        uuid.UUID                      `json:"id"`
-	BookingID uuid.UUID                      `json:"bookingId"`
-	SeatID    uuid.UUID                      `json:"seatId"`
-	Price     pgx_shopspring_decimal.Decimal `json:"price"`
-	CreatedAt time.Time                      `json:"createdAt"`
+	ID        uuid.UUID `json:"id"`
+	BookingID uuid.UUID `json:"bookingId"`
+	SeatID    uuid.UUID `json:"seatId"`
+	Price     int64     `json:"price"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type City struct {
@@ -107,9 +106,9 @@ type Show struct {
 }
 
 type ShowSeatPricing struct {
-	ShowID     uuid.UUID                      `json:"showId"`
-	SeatTypeID uuid.UUID                      `json:"seatTypeId"`
-	Price      pgx_shopspring_decimal.Decimal `json:"price"`
+	ShowID     uuid.UUID `json:"showId"`
+	SeatTypeID uuid.UUID `json:"seatTypeId"`
+	Price      int64     `json:"price"`
 }
 
 type Theater struct {

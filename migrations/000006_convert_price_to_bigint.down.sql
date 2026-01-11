@@ -1,0 +1,8 @@
+ALTER TABLE show_seat_pricing
+ALTER COLUMN price TYPE NUMERIC(3,1);
+
+ALTER TABLE booking_items
+ALTER COLUMN price TYPE NUMERIC(3,1);
+
+ALTER TABLE bookings
+ALTER COLUMN total_amount TYPE NUMERIC(3,1);

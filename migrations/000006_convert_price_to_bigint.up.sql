@@ -1,0 +1,8 @@
+ALTER TABLE show_seat_pricing
+ALTER COLUMN price TYPE BIGINT;
+
+ALTER TABLE booking_items
+ALTER COLUMN price TYPE BIGINT;
+
+ALTER TABLE bookings
+ALTER COLUMN total_amount TYPE BIGINT;
