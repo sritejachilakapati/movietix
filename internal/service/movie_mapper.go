@@ -21,6 +21,7 @@ func movieFromDB(dbMovie repository.Movie) domain.Movie {
 		Synopsis:       dbMovie.Synopsis,
 		LanguageCode:   dbMovie.LanguageCode,
 		RuntimeMinutes: dbMovie.RuntimeMinutes,
+		Certification:  dbMovie.Certification,
 		PosterURL:      dbMovie.PosterUrl,
 		TrailerURL:     dbMovie.TrailerUrl,
 		Rating:         rating,

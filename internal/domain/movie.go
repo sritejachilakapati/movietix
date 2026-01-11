@@ -12,6 +12,7 @@ type Movie struct {
 	Synopsis       string    `json:"synopsis"`
 	LanguageCode   string    `json:"languageCode"`
 	RuntimeMinutes int32     `json:"runtimeMinutes"`
+	Certification  *string   `json:"certification,omitempty"`
 	PosterURL      *string   `json:"posterUrl,omitempty"`
 	TrailerURL     *string   `json:"trailerUrl,omitempty"`
 	Rating         *float32  `json:"rating,omitempty"`
