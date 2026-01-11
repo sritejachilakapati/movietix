@@ -1,4 +1,4 @@
-package database
+package config
 
 import (
 	"context"
@@ -6,10 +6,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Connect(ctx context.Context) *pgx.Conn {
+func NewDBPool(ctx context.Context) *pgxpool.Pool {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	username := os.Getenv("DB_USERNAME")
@@ -18,10 +18,10 @@ func Connect(ctx context.Context) *pgx.Conn {
 
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", username, password, host, port, database)
 
-	conn, err := pgx.Connect(ctx, dsn)
+	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	return conn
+	return pool
 }

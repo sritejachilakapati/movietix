@@ -9,7 +9,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sritejachilakapati/movietix/internal/config"
-	"github.com/sritejachilakapati/movietix/internal/database"
 )
 
 func contentTypeApplicationJsonMiddleware(next http.Handler) http.Handler {
@@ -50,7 +49,7 @@ func (w jsonResponseWriter) WriteJson(statusCode int, data interface{}) (int, er
 }
 
 func main() {
-	err := config.LoadEnv()
+	err := config.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -61,8 +60,8 @@ func main() {
 		jw := jsonResponseWriter{w}
 
 		ctx := r.Context()
-		conn := database.Connect(ctx)
-		defer conn.Close(ctx)
+		pool := config.NewDBPool(ctx)
+		defer pool.Close()
 
 		params := r.Context().Value(paramsKey).(map[string][]string)
 		fmt.Printf("Params: %v\n", params)

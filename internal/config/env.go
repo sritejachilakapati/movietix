@@ -4,6 +4,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func LoadEnv() error {
+func Load() error {
 	return godotenv.Load()
 }
