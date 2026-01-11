@@ -46,9 +46,9 @@ type Movie struct {
 	ID             uuid.UUID      `json:"id"`
 	Title          string         `json:"title"`
 	LanguageCode   string         `json:"languageCode"`
-	Synopsis       *string        `json:"synopsis"`
+	Synopsis       string         `json:"synopsis"`
 	ReleaseDate    time.Time      `json:"releaseDate"`
-	RuntimeMinutes *int32         `json:"runtimeMinutes"`
+	RuntimeMinutes int32          `json:"runtimeMinutes"`
 	PosterUrl      *string        `json:"posterUrl"`
 	TrailerUrl     *string        `json:"trailerUrl"`
 	CreatedAt      time.Time      `json:"createdAt"`

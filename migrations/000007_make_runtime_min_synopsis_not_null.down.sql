@@ -1,0 +1,3 @@
+ALTER TABLE movies
+    ALTER COLUMN synopsis DROP NOT NULL,
+    ALTER COLUMN runtime_minutes DROP NOT NULL
