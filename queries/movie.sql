@@ -8,4 +8,6 @@ FROM movies m
 WHERE t.city_code = $1
   AND s.start_time > now()
   AND s.status != 'cancelled'
-ORDER BY m.rating_score DESC NULLS LAST;
+ORDER BY m.rating DESC NULLS LAST
+LIMIT $2
+OFFSET $3;

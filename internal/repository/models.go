@@ -52,10 +52,9 @@ type Movie struct {
 	RuntimeMinutes *int32         `json:"runtimeMinutes"`
 	PosterUrl      *string        `json:"posterUrl"`
 	TrailerUrl     *string        `json:"trailerUrl"`
-	Rating         *string        `json:"rating"`
 	CreatedAt      time.Time      `json:"createdAt"`
 	Certification  *string        `json:"certification"`
-	RatingScore    pgtype.Numeric `json:"ratingScore"`
+	Rating         pgtype.Numeric `json:"rating"`
 }
 
 type Screen struct {

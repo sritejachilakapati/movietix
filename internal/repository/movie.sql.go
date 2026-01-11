@@ -11,7 +11,7 @@ import (
 
 const getMoviesByCity = `-- name: GetMoviesByCity :many
 SELECT DISTINCT
-    m.id, m.title, m.language_code, m.synopsis, m.release_date, m.runtime_minutes, m.poster_url, m.trailer_url, m.rating, m.created_at, m.certification, m.rating_score
+    m.id, m.title, m.language_code, m.synopsis, m.release_date, m.runtime_minutes, m.poster_url, m.trailer_url, m.created_at, m.certification, m.rating
 FROM movies m
          JOIN shows s ON s.movie_id = m.id
          JOIN screens sc ON sc.id = s.screen_id
@@ -19,11 +19,19 @@ FROM movies m
 WHERE t.city_code = $1
   AND s.start_time > now()
   AND s.status != 'cancelled'
-ORDER BY m.rating_score DESC NULLS LAST
+ORDER BY m.rating DESC NULLS LAST
+LIMIT $2
+OFFSET $3
 `
 
-func (q *Queries) GetMoviesByCity(ctx context.Context, cityCode string) ([]Movie, error) {
-	rows, err := q.db.Query(ctx, getMoviesByCity, cityCode)
+type GetMoviesByCityParams struct {
+	CityCode string `json:"cityCode"`
+	Limit    int32  `json:"limit"`
+	Offset   int32  `json:"offset"`
+}
+
+func (q *Queries) GetMoviesByCity(ctx context.Context, arg GetMoviesByCityParams) ([]Movie, error) {
+	rows, err := q.db.Query(ctx, getMoviesByCity, arg.CityCode, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -40,10 +48,9 @@ func (q *Queries) GetMoviesByCity(ctx context.Context, cityCode string) ([]Movie
 			&i.RuntimeMinutes,
 			&i.PosterUrl,
 			&i.TrailerUrl,
-			&i.Rating,
 			&i.CreatedAt,
 			&i.Certification,
-			&i.RatingScore,
+			&i.Rating,
 		); err != nil {
 			return nil, err
 		}
